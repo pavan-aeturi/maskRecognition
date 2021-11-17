@@ -2,6 +2,12 @@ from keras.models import load_model
 import cv2
 import numpy as np
 
+def rescale_frame(frame, percent=75):
+    width = int(frame.shape[1] * percent/ 100)
+    height = int(frame.shape[0] * percent/ 100)
+    dim = (width, height)
+    return cv2.resize(frame, dim, interpolation =cv2.INTER_AREA)
+
 model = load_model('model-012.model')
 
 face_clsfr=cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
@@ -25,12 +31,10 @@ while(True):
         reshaped=np.reshape(normalized,(1,100,100,1))
         result=model.predict(reshaped)
         label=np.argmax(result,axis=1)[0]
-        print(labels_dict[label])
         cv2.rectangle(img,(x,y),(x+w,y+h),color_dict[label],2)
         cv2.rectangle(img,(x,y-40),(x+w,y),color_dict[label],-1)
         cv2.putText(img, labels_dict[label], (x, y-10),cv2.FONT_HERSHEY_SIMPLEX,0.8,(255,255,255),2)
-     
-    cv2.imshow('LIVE',img)
+    cv2.imshow('LIVE',rescale_frame(img, percent=60))
     key=cv2.waitKey(1)
     
     if(key==27):
